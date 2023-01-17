@@ -23,6 +23,14 @@ describe('flattenArr', () => {
 
     expect(flattenArr(input)).toEqual(expectedOutput);
   });
+
+  it('flattens an empty arr', () => {
+    const input = [];
+    const expectedOutput = [];
+
+    expect(flattenArr(input)).toEqual(expectedOutput);
+  })
+  
 });
 
 describe('dataFetcher', () => {
@@ -63,7 +71,18 @@ describe('sortList', () => {
 
     expect(sortFn).not.toBeCalled();
     expect(sortFn).toBeCalledTimes(0);
+
+    sortList([], sortFn);
+
+    expect(sortFn).not.toBeCalled();
+    expect(sortFn).toBeCalledTimes(0);
+
   });
+
+  it('returns the array if no function is passed in', () => {
+    expect(sortList([1])).toEqual([1]);
+    expect(sortList([1,2,3])).toEqual([1,2,3]);
+  })
 });
 
 /**
@@ -72,13 +91,43 @@ describe('sortList', () => {
  */
 
 describe('formatCurrency', () => {
-  it('does <insert your test here>', () => {
-    return true;
+  it('returns $0.00 if input is not a number (NaN)', () => {
+    
+    expect(formatCurrency("test")).toEqual("$0.00")
+    expect(formatCurrency({test: "not number"})).toEqual("$0.00")
+    expect(formatCurrency(NaN)).toEqual("$0.00")
+    expect(formatCurrency(undefined)).toEqual("$0.00")
+    expect(formatCurrency([1, 2, 3])).toEqual("$0.00")
+    
+  });
+
+  it('returns formatted currency if !NaN', () => {
+    
+    expect(formatCurrency(5)).toEqual("$5.00")
+    expect(formatCurrency(3.5)).toEqual("$3.50")
+    expect(formatCurrency(6.813)).toEqual("$6.81")
+    expect(formatCurrency(0.1)).toEqual("$0.10")
+    
   });
 });
 
 describe('handlePromises', () => {
-  it('does <insert your test here>', () => {
-    return true;
+  it('returns data array if resolved', async () => {
+    let tasks = []
+    axios.get.mockImplementation(() => Promise.resolve([tasks]));
+
+    const data = await handlePromises([tasks]);
+
+    expect(data).toEqual([tasks]);
+  });
+  it('returns throws an error if promise is rejected', async () => {
+    let tasks = []
+    axios.get.mockImplementation(() => Promise.reject("Big fat nope"));
+
+    try{
+      await handlePromises([tasks]);
+    } catch(e){
+      expect(e).toEqual(new Error({error: "Big fat nope"}));
+    }
   });
 });
